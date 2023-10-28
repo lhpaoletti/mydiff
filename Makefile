@@ -14,7 +14,7 @@ $(TARGET): $(OBJECT)
 	gcc $(CFLAGS) -o $(TARGET) $(OBJECT)
 
 $(OBJECT): $(SOURCE)
-	gcc -o $(OBJECT) -c $(SOURCE)
+	gcc $(CFLAGS) -o $(OBJECT) -c $(SOURCE)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
