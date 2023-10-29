@@ -23,7 +23,7 @@ void abort_mydiff(char *str) {
 
 
 int parse_arguments(
-        const int argc, char *const *argv, 
+        const int argc, char *const *argv,
         const char **outfile, bool *const i_opt,
         const char **file1, const char **file2
 ) {
@@ -80,8 +80,8 @@ int parse_arguments(
 
 
 int open_files(
-        const char *file_name1, FILE **file1, 
-        const char *file_name2, FILE **file2, 
+        const char *file_name1, FILE **file1,
+        const char *file_name2, FILE **file2,
         const char *outfile_name, FILE **outfile
 ) {
     if (outfile_name == NULL) {
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
     const char *file_name1, *file_name2;
 
     int parse_result = parse_arguments(
-            argc, argv, 
+            argc, argv,
             &outfile_name, &i_opt,
             &file_name1, &file_name2);
     if (parse_result != 0) {
@@ -126,8 +126,8 @@ int main(int argc, char** argv) {
 
     FILE *file1, *file2, *outfile;
     int open_result = open_files(
-            file_name1, &file1, 
-            file_name2, &file2, 
+            file_name1, &file1,
+            file_name2, &file2,
             outfile_name, &outfile);
     if (open_result != 0) {
         return open_result;
