@@ -79,6 +79,37 @@ int parse_arguments(
 }
 
 
+int open_files(
+        const char *file_name1, FILE **file1, 
+        const char *file_name2, FILE **file2, 
+        const char *outfile_name, FILE **outfile
+) {
+    if (outfile_name == NULL) {
+        *outfile = stdout;
+    } else {
+        *outfile = fopen(outfile_name, "w");
+    }
+    *file1 = fopen(file_name1, "r");
+    *file2 = fopen(file_name2, "r");
+
+    if (*file1 == NULL && *file2 == NULL) {
+        fprintf(stderr, "Both files given failed to open: %s, %s\n", file_name1, file_name2);
+        return 1;
+    } else if (*file1 == NULL) {
+        fprintf(stderr, "The file1 failed to open: %s\n", file_name1);
+        return 1;
+    } else if (*file2 == NULL) {
+        fprintf(stderr, "The file2 failed to open: %s\n", file_name2);
+        return 1;
+    }
+    if (*outfile == NULL) {
+        fprintf(stderr, "The outfile failed to open: %s\n", outfile_name);
+        return 1;
+    }
+    return 0;
+}
+
+
 int main(int argc, char** argv) {
 
     bool i_opt = false;
@@ -92,6 +123,16 @@ int main(int argc, char** argv) {
     if (parse_result != 0) {
         return parse_result;
     }
+
+    FILE *file1, *file2, *outfile;
+    int open_result = open_files(
+            file_name1, &file1, 
+            file_name2, &file2, 
+            outfile_name, &outfile);
+    if (open_result != 0) {
+        return open_result;
+    }
+
 
 
     return 0;
