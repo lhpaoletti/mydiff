@@ -1,4 +1,8 @@
+#include <ctype.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <unistd.h>
 
 
 void trace(char *str) {
@@ -18,7 +22,77 @@ void abort_mydiff(char *str) {
 }
 
 
+int parse_arguments(
+        const int argc, char *const *argv, 
+        const char **outfile, bool *const i_opt,
+        const char **file1, const char **file2
+) {
+    char opt;
+    while ((opt = getopt(argc, argv, "io:")) != -1) {
+        switch (opt) {
+        case 'i':
+            *i_opt = true;
+            break;
+        case 'o':
+            if (strcmp(optarg, "--") != 0) {
+                *outfile = optarg;
+            } else {
+                abort_mydiff("The option -o requires one argument");
+                return 1;
+            }
+            break;
+
+        case '?':
+        default:
+            if (optopt == 'o') {
+                abort_mydiff("The option -o requires one argument");
+            } else if (isprint(optopt)) {
+                // FIXME try to figure out a better solution for this
+                fprintf(stderr, "The option -%c is not supported.\n", optopt);
+                usage();
+            } else {
+                abort_mydiff("An unrecognizable character was given as option");
+            }
+            return 1;
+        }
+    }
+
+    int posargs_num = argc - optind;
+    if (posargs_num != 2) {
+        switch (posargs_num) {
+            case 0:
+                abort_mydiff("The program requires 2 positional arguments");
+                break;
+            case 1:
+                abort_mydiff("file2 is missing");
+                break;
+            default:
+                abort_mydiff("More than 2 file names were given");
+        }
+        return 1;
+    } else {
+        *file1 = argv[optind];
+        *file2 = argv[optind + 1];
+    }
+
+    return 0;
+}
+
+
 int main(int argc, char** argv) {
-    printf("Hello world\n");
+
+    bool i_opt = false;
+    const char *outfile_name = NULL;
+    const char *file_name1, *file_name2;
+
+    int parse_result = parse_arguments(
+            argc, argv, 
+            &outfile_name, &i_opt,
+            &file_name1, &file_name2);
+    if (parse_result != 0) {
+        return parse_result;
+    }
+
+
     return 0;
 }
