@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -27,11 +28,17 @@ int parse_arguments(
         const char **outfile, bool *const i_opt,
         const char **file1, const char **file2
 ) {
+    int i_count = 0;
     char opt;
     while ((opt = getopt(argc, argv, "io:")) != -1) {
         switch (opt) {
         case 'i':
+            i_count++;
             *i_opt = true;
+            if (i_count > 1) {
+                abort_mydiff("The option -i can only be given once");
+                return 1;
+            }
             break;
         case 'o':
             if (strcmp(optarg, "--") != 0) {
@@ -110,6 +117,11 @@ int open_files(
 }
 
 
+ssize_t min(ssize_t this, ssize_t that) {
+    return (this < that) ? this : that;
+}
+
+
 int main(int argc, char** argv) {
 
     bool i_opt = false;
@@ -134,6 +146,48 @@ int main(int argc, char** argv) {
     }
 
 
+    int diff_count;
+    int line_count = 0;
+    char *line1 = NULL;
+    char *line2 = NULL;
+    char *char1, *char2;
+    size_t line1_cap = 0;
+    size_t line2_cap = 0;
+    ssize_t written1, written2;
+    size_t diff_length;
 
+    do {
+        written1 = getline(&line1, &line1_cap, file1);
+        written2 = getline(&line2, &line2_cap, file2);
+        if (written1 <= 0 || written2 <= 0) { break; }
+
+        diff_count = 0;
+        line_count++;
+        if (written1 == 1 || written2 == 1) { continue; }
+
+        // This cast is safe because of the break-condition.
+        diff_length = (size_t) min(written1, written2);
+        diff_length--;  // Ignore the newline character.
+
+        for (size_t i = 0; i < diff_length; i++) {
+            char1 = line1 + i;
+            char2 = line2 + i;
+            if (i_opt) {
+                *char1 = tolower(*char1);
+                *char2 = tolower(*char2);
+            }
+            if (*char1 != *char2) {
+                diff_count++;
+            }
+        }
+        if (diff_count > 0) {
+            fprintf(outfile, "Line: %d, characters: %d\n", line_count, diff_count);
+        }
+
+    } while (true);
+
+
+    free(line1);
+    free(line2);
     return 0;
 }
