@@ -54,7 +54,6 @@ int parse_arguments(
             if (optopt == 'o') {
                 abort_mydiff("The option -o requires one argument");
             } else if (isprint(optopt)) {
-                // FIXME try to figure out a better solution for this
                 fprintf(stderr, "The option -%c is not supported.\n", optopt);
                 usage();
             } else {
